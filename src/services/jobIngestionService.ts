@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { JobAggregator } from './jobFetcher.js';
 import { normalizeJob } from './normalization.js';
 import { JobRepository } from './jobRepository.js';
@@ -173,23 +174,16 @@ ${job.description?.substring(0, 2000) || ''}
    * Call OpenAI API to generate embedding
    */
   private async getEmbedding(text: string, apiKey: string): Promise<number[]> {
-    const response = await fetch('https://api.openai.com/v1/embeddings', {
-      method: 'POST',
+    const response = await axios.post('https://api.openai.com/v1/embeddings', {
+      input: text,
+      model: 'text-embedding-3-small',
+    }, {
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        input: text,
-        model: 'text-embedding-3-small',
-      }),
     });
 
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.statusText}`);
-    }
-
-    const data: any = await response.json();
-    return data.data[0].embedding;
+    return response.data.data[0].embedding;
   }
 }

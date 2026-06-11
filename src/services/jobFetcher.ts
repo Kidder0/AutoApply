@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import axios from 'axios';
 import { RawJob } from './normalization.js';
 
 export interface JobFetcher {
@@ -54,8 +54,8 @@ export class GreenhouseFetcher implements JobFetcher {
       const url = `https://boards-api.greenhouse.io/v1/boards/${this.boardToken}/jobs?content=true`;
       
       console.log(`📢 Fetching Greenhouse jobs`);
-      const response = await fetch(url);
-      const data: any = await response.json();
+      const response = await axios.get(url);
+      const data = response.data;
 
       if (data.jobs) {
         for (const job of data.jobs) {
@@ -111,8 +111,8 @@ export class LeverFetcher implements JobFetcher {
       const url = `https://api.lever.co/v0/postings/company/${this.company}?mode=posting`;
       
       console.log(`📢 Fetching Lever jobs for ${this.company}`);
-      const response = await fetch(url);
-      const data: any = await response.json();
+      const response = await axios.get(url);
+      const data = response.data;
 
       if (data.data) {
         for (const job of data.data) {
@@ -173,16 +173,14 @@ export class AshbyFetcher implements JobFetcher {
       const url = `https://api.ashby.io/posting.listPostings`;
       
       console.log(`📢 Fetching Ashby jobs`);
-      const response = await fetch(url, {
-        method: 'POST',
+      const response = await axios.post(url, {}, {
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({}),
       });
 
-      const data: any = await response.json();
+      const data = response.data;
 
       if (data.results) {
         for (const job of data.results) {
@@ -234,8 +232,8 @@ export class SmartRecruitersFetcher implements JobFetcher {
       const url = `https://api.smartrecruiters.com/v1/companies/${this.companyId}/postings?limit=100`;
       
       console.log(`📢 Fetching SmartRecruiters jobs`);
-      const response = await fetch(url);
-      const data: any = await response.json();
+      const response = await axios.get(url);
+      const data = response.data;
 
       if (data.content) {
         for (const job of data.content) {
