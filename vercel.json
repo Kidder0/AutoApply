@@ -1,6 +1,12 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "crons": [
+    {
+      "path": "/api/cron/jobs-discovery",
+      "schedule": "0 */2 * * *"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -36,6 +42,10 @@
   ],
   "env": {
     "GEMINI_API_KEY": "@gemini_api_key",
-    "OPENAI_API_KEY": "@openai_api_key"
+    "OPENAI_API_KEY": "@openai_api_key",
+    "DATABASE_URL": "@database_url",
+    "CRON_SECRET": "@cron_secret",
+    "GREENHOUSE_BOARDS": "@greenhouse_boards",
+    "LEVER_COMPANIES": "@lever_companies"
   }
 }
