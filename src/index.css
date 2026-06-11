@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "EB Garamond", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer utilities {
+  @media print {
+    body * {
+      visibility: hidden !important;
+    }
+    #printable-document-canvas, #printable-document-canvas * {
+      visibility: visible !important;
+    }
+    #printable-document-canvas {
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 100% !important;
+      height: auto !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 2.5cm !important;
+      margin: 0 !important;
+      background: white !important;
+      color: black !important;
+    }
+  }
+}
+

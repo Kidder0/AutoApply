@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Aggregator Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .header h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 16px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      background: #667eea;
+      color: white;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #5568d3;
+    }
+
+    button.active {
+      background: #764ba2;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .jobs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+    }
+
+    .job-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+    }
+
+    .job-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+
+    .job-card.new::before {
+      content: 'NEW';
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #4CAF50;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .job-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .job-company {
+      font-size: 16px;
+      color: #667eea;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .job-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+      font-size: 13px;
+    }
+
+    .badge {
+      background: #f0f0f0;
+      color: #333;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .badge.location {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .badge.remote {
+      background: #f3e5f5;
+      color: #7b1fa2;
+    }
+
+    .badge.salary {
+      background: #e8f5e9;
+      color: #388e3c;
+    }
+
+    .job-description {
+      color: #666;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 15px;
+      max-height: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .job-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+      font-size: 12px;
+      color: #999;
+    }
+
+    .apply-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 13px;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.3s;
+    }
+
+    .apply-btn:hover {
+      background: #5568d3;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: white;
+      font-size: 18px;
+    }
+
+    .error {
+      background: #f44336;
+      color: white;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px;
+      background: white;
+      border-radius: 10px;
+      color: #666;
+    }
+
+    @media (max-width: 768px) {
+      .jobs-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🚀 Job Aggregator Demo</h1>
+      <p>Live job discovery from 6 ATS platforms</p>
+      
+      <div class="controls">
+        <button onclick="filterJobs('all')" class="active" id="btn-all">All Jobs</button>
+        <button onclick="filterJobs('new')" id="btn-new">New Only</button>
+        <button onclick="filterJobs('remote')" id="btn-remote">Remote</button>
+        <button onclick="filterJobs('hybrid')" id="btn-hybrid">Hybrid</button>
+        <button onclick="filterJobs('onsite')" id="btn-onsite">Onsite</button>
+        <button onclick="refreshData()">🔄 Refresh</button>
+      </div>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat-card">
+        <div class="stat-value" id="total-jobs">-</div>
+        <div class="stat-label">Total Jobs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="new-jobs">-</div>
+        <div class="stat-label">New Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="remote-jobs">-</div>
+        <div class="stat-label">Remote</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="avg-salary">-</div>
+        <div class="stat-label">Avg Salary</div>
+      </div>
+    </div>
+
+    <div id="error"></div>
+    <div id="loading" class="loading">Loading jobs...</div>
+    <div id="jobs" class="jobs-grid"></div>
+  </div>
+
+  <script>
+    let allJobs = [];
+    let currentFilter = 'all';
+
+    async function loadJobs() {
+      try {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('error').innerHTML = '';
+        
+        const response = await fetch('http://localhost:3000/api/jobs?limit=100');
+        if (!response.ok) throw new Error('Failed to load jobs');
+        
+        const data = await response.json();
+        allJobs = data.data || [];
+        
+        updateStats();
+        displayJobs(allJobs);
+        document.getElementById('loading').style.display = 'none';
+      } catch (err) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').innerHTML = `<div class="error">⚠️ ${err.message}</div>`;
+        console.error('Error:', err);
+      }
+    }
+
+    function updateStats() {
+      const total = allJobs.length;
+      const newJobs = allJobs.filter(j => j.isNew).length;
+      const remote = allJobs.filter(j => j.remoteType === 'remote').length;
+      
+      const salaries = allJobs
+        .filter(j => j.salaryMin && j.salaryMax)
+        .map(j => (j.salaryMin + j.salaryMax) / 2);
+      const avgSalary = salaries.length > 0 
+        ? '$' + Math.round(salaries.reduce((a,b) => a+b,0) / salaries.length / 1000) + 'k'
+        : '-';
+
+      document.getElementById('total-jobs').textContent = total;
+      document.getElementById('new-jobs').textContent = newJobs;
+      document.getElementById('remote-jobs').textContent = remote;
+      document.getElementById('avg-salary').textContent = avgSalary;
+    }
+
+    function filterJobs(filter) {
+      currentFilter = filter;
+      
+      // Update button states
+      document.querySelectorAll('.controls button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`btn-${filter}`).classList.add('active');
+
+      let filtered = allJobs;
+      
+      if (filter === 'new') {
+        filtered = allJobs.filter(j => j.isNew);
+      } else if (filter === 'remote') {
+        filtered = allJobs.filter(j => j.remoteType === 'remote');
+      } else if (filter === 'hybrid') {
+        filtered = allJobs.filter(j => j.remoteType === 'hybrid');
+      } else if (filter === 'onsite') {
+        filtered = allJobs.filter(j => j.remoteType === 'onsite');
+      }
+
+      displayJobs(filtered);
+    }
+
+    function displayJobs(jobs) {
+      const container = document.getElementById('jobs');
+      
+      if (jobs.length === 0) {
+        container.innerHTML = '<div class="empty" style="grid-column: 1/-1;">No jobs found</div>';
+        return;
+      }
+
+      container.innerHTML = jobs.map(job => `
+        <div class="job-card ${job.isNew ? 'new' : ''}">
+          <div class="job-title">${escapeHtml(job.title)}</div>
+          <div class="job-company">${escapeHtml(job.company)}</div>
+          
+          <div class="job-meta">
+            ${job.location ? `<span class="badge location">📍 ${escapeHtml(job.location)}</span>` : ''}
+            ${job.remoteType ? `<span class="badge remote">🏠 ${escapeHtml(job.remoteType)}</span>` : ''}
+            ${job.employmentType ? `<span class="badge">${escapeHtml(job.employmentType)}</span>` : ''}
+            ${job.salaryMin && job.salaryMax ? `<span class="badge salary">💰 $${(job.salaryMin/1000).toFixed(0)}-${(job.salaryMax/1000).toFixed(0)}k</span>` : ''}
+          </div>
+
+          <div class="job-description">${escapeHtml(job.description ? job.description.substring(0, 150) + '...' : '')}</div>
+
+          <div class="job-footer">
+            <span>${new Date(job.postedDate).toLocaleDateString()}</span>
+            <a href="${job.applyUrl}" target="_blank" class="apply-btn">Apply</a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function refreshData() {
+      loadJobs();
+    }
+
+    // Load jobs on page load
+    window.addEventListener('load', loadJobs);
+  </script>
+</body>
+</html>

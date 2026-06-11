@@ -1,0 +1,74 @@
+{
+  "entities": {
+    "Job": {
+      "title": "Job",
+      "description": "Represents a discovered job posting",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "company": { "type": "string" },
+        "description": { "type": "string" },
+        "location": { "type": "string" },
+        "salary": { "type": "string" },
+        "numericSalaryMin": { "type": "number" },
+        "numericSalaryMax": { "type": "number" },
+        "workType": { "type": "string" },
+        "source": { "type": "string" },
+        "skills": { "type": "array" },
+        "visaSponsorship": { "type": "boolean" },
+        "url": { "type": "string" },
+        "postedDate": { "type": "string" },
+        "isExcluded": { "type": "boolean" },
+        "isScam": { "type": "boolean" },
+        "credibilityScore": { "type": "number" },
+        "duplicateOfId": { "type": "string" },
+        "isNew": { "type": "boolean" },
+        "embedding": { "type": "array" }
+      },
+      "required": ["id", "title", "company", "description"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Compliance security action logged",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "action": { "type": "string" },
+        "userId": { "type": "string" },
+        "details": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "timestamp", "action", "userId", "details", "status"]
+    },
+    "IngestionMetric": {
+      "title": "IngestionMetric",
+      "description": "Metrics about job discovery executions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "jobsDiscovered": { "type": "number" },
+        "newJobsAdded": { "type": "number" },
+        "duplicatesRemoved": { "type": "number" },
+        "failedCrawls": { "type": "number" }
+      },
+      "required": ["id", "timestamp", "jobsDiscovered", "newJobsAdded", "duplicatesRemoved", "failedCrawls"]
+    }
+  },
+  "firestore": {
+    "/jobs/{jobId}": {
+      "schema": "Job",
+      "description": "Discovered job openings"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Security audit compliance logs"
+    },
+    "/ingestionMetrics/{metricId}": {
+      "schema": "IngestionMetric",
+      "description": "Job ingestion runs and statistics"
+    }
+  }
+}

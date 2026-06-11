@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Globally Shared Validation Primitives
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // 3. Entity Specific Validations
+    function isValidJob(data) {
+      return data.id is string 
+        && data.id.size() <= 200 
+        && data.title is string 
+        && data.title.size() <= 1000 
+        && data.company is string 
+        && data.company.size() <= 1000 
+        && data.description is string 
+        && data.description.size() <= 100000;
+    }
+
+    function isValidAuditLog(data) {
+      return data.id is string 
+        && data.id.size() <= 200 
+        && data.action is string 
+        && data.action.size() <= 500 
+        && data.timestamp is string 
+        && data.timestamp.size() <= 100 
+        && data.userId is string 
+        && data.userId.size() <= 200 
+        && data.details is string 
+        && data.details.size() <= 200000 
+        && data.status is string 
+        && data.status.size() <= 100 
+        && (data.status == 'success' || data.status == 'warning' || data.status == 'error');
+    }
+
+    function isValidIngestionMetric(data) {
+      return data.id is string 
+        && data.id.size() <= 200 
+        && data.timestamp is string 
+        && data.timestamp.size() <= 100 
+        && data.jobsDiscovered is number 
+        && data.newJobsAdded is number 
+        && data.duplicatesRemoved is number 
+        && data.failedCrawls is number;
+    }
+
+    // 4. Job Resource Match Rules (Read publicly, write strictly validated)
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow create, update: if isValidId(jobId) && isValidJob(incoming());
+      allow delete: if false;
+    }
+
+    // 5. Audit Log Match Rules (Read publicly, append-only with structure validation)
+    match /auditLogs/{logId} {
+      allow read: if true;
+      allow create: if isValidId(logId) && isValidAuditLog(incoming());
+      allow update, delete: if false;
+    }
+
+    // 6. Ingestion Metrics Match Rules (Read publicly, write strictly validated)
+    match /ingestionMetrics/{metricId} {
+      allow read: if true;
+      allow create, update: if isValidId(metricId) && isValidIngestionMetric(incoming());
+      allow delete: if false;
+    }
+  }
+}
